@@ -231,7 +231,7 @@ class LESSlice(object):
         self.data_name = data_name
         self.data_units = data_units
 
-    def plot(self, axis=None, ptype='contourf', clim=[None, None], **kwargs):
+    def plot(self, axis=None, title=None, ptype='contourf', clim=[None, None], **kwargs):
         """Plot slice.
 
         :axis: (matplotlib.axes, optional) axis to plot figure on
@@ -249,13 +249,20 @@ class LESSlice(object):
         else:
             fig = axis.contourf(self.xx, self.yy, self.data, vmin=clim[0], vmax=clim[1], **kwargs)
 
+        # axis labels
         axis.set_xlabel(self.xx_name+' ('+self.xx_units+')')
         axis.set_ylabel(self.yy_name+' ('+self.yy_units+')')
 
+        # aspect ratio
         if self.xx_name == 'x' and self.yy_name == 'y':
             axis.set_aspect('equal', 'box')
 
-        cb = plt.colorbar(fig)
+        # title
+        if title is not None:
+            axis.set_title(title)
+
+        # add colorbar
+        cb = plt.colorbar(fig, ax=axis)
         cb.set_clim(clim[0], clim[1])
         cb.formatter.set_powerlimits((-2, 2))
         cb.update_ticks()
