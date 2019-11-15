@@ -34,10 +34,133 @@ class LESProfile(object):
         self.data = data
         self.data_name = data_name
         self.data_units = data_units
-        try:
-            self.data_mean = np.mean(data, axis=0)
-        except TypeError:
-            self.data_mean = None
+
+    def __add__(self, other):
+        """Return the sum of two LESProfile objects
+
+        :other: (LESProfile object): LESProfile objects to be summed
+
+        """
+        assert type(other) == type(LESProfile()), 'Only LESProfile object can be added to a LESProfile object'
+        assert self.data_units == other.data_units, 'LESProfile has a different unit'
+        assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+        assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+        assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+        assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                         z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                         data=self.data+other.data, data_name=self.data_name+' + '+other.data_name, \
+                         data_units=self.data_units)
+        return out
+
+    def __sub__(self, other):
+        """Return the difference between two LESProfile objects
+
+        :other: (LESProfile object): LESProfile objects to be subtracted
+
+        """
+        assert type(other) == type(LESProfile()), 'Only LESProfile object can be subtracted from a LESProfile object'
+        assert self.data_units == other.data_units, 'LESProfile has a different unit'
+        assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+        assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+        assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+        assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                         z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                         data=self.data-other.data, data_name=self.data_name+' - '+other.data_name, \
+                         data_units=self.data_units)
+        return out
+
+    def __mul__(self, other):
+        """Return the product of two LESProfile objects
+
+        :other: (LESProfile object): LESProfile objects to be multiply self
+
+        """
+        if type(other) == float:
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data*other, data_name=self.data_name, data_units=self.data_units)
+        elif type(other) == type(LESProfile()):
+            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data*other.data, data_name=self.data_name+' * '+other.data_name, \
+                             data_units=self.data_units+' * '+other.data_units)
+        else:
+            raise TypeError('Multiplication by a(n) {} object is not supported.'.format(type(other)))
+        return out
+
+    def __truediv__(self, other):
+        """Return the ratio of two LESProfile objects
+
+        :other: (LESProfile object): LESProfile objects to divide self
+
+        """
+        if type(other) == float:
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data/other, data_name=self.data_name+' ratio', data_units='none')
+        elif type(other) == type(LESProfile()):
+            assert self.data_units == other.data_units, 'LESProfile has a different unit'
+            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data/other.data, data_name=self.data_name+' / '+other.data_name, \
+                             data_units=self.data_units+' / '+other.data_units)
+        else:
+            raise TypeError('Division by a(n) {} object is not supported.'.format(type(other)))
+        return out
+
+    def save(self, path):
+        """Save LESProfile object
+
+        :path: (str) path of file to save
+        :returns: none
+
+        """
+        np.savez(path, data=self.data, \
+                 data_name=self.data_name, data_units=self.data_units, \
+                 time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                 z=self.z, z_name=self.z_name, z_units=self.z_units)
+
+    def load(self, path):
+        """Load data to LESProfile object
+
+        :path: (str) path of file to load
+        :returns: (LESProfile object)
+
+        """
+        dat = np.load(path)
+        self.__init__(data=dat['data'], \
+                      data_name=dat['data_name'], data_units=dat['data_units'], \
+                      time=dat['time'], time_name=dat['time_name'], time_units=dat['time_units'],\
+                      z=dat['z'], z_name=dat['z_name'], z_units=dat['z_units'])
+        return self
+
+    def data_mean(self):
+        """Return the time mean of LESProfile data
+
+        """
+        out = np.mean(self.data, axis=0)
+        return out
+
+    def gradz(self):
+        """Return the vertical gradient of LESProfile
+
+        """
+        data = (self.data[:,1:]-self.data[:,0:-1])/(self.z[1:]-self.z[0:-1])
+        z = 0.5*(self.z[1:]+self.z[0:-1])
+        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                         z=z, z_name=self.z_name, z_units=self.z_units, \
+                         data=data, data_name='ddz '+self.data_name, data_units=self.data_units+'/m')
+        return out
 
     def plot(self, axis=None, xlim=None, ylim=None,
                    xlabel=None, ylabel=None, title=None,
