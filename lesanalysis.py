@@ -35,76 +35,26 @@ class LESProfile(object):
         self.data_name = data_name
         self.data_units = data_units
 
+    def __neg__(self):
+        """Return the negated LESProfile object
+
+        """
+        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                         z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                         data=-self.data, data_name=self.data_name, data_units=self.data_units)
+        return out
+
     def __add__(self, other):
-        """Return the sum of two LESProfile objects
+        """Add 'other' to a LESProfile object
 
-        :other: (LESProfile object): LESProfile objects to be summed
-
-        """
-        assert type(other) == type(LESProfile()), 'Only LESProfile object can be added to a LESProfile object'
-        assert self.data_units == other.data_units, 'LESProfile has a different unit'
-        assert self.time_units == other.time_units, 'LESProfile has a different time unit'
-        assert self.z_units == other.z_units, 'LESProfile has a different z unit'
-        assert all(self.time == other.time), 'LESProfile has a different time coordinate'
-        assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
-        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
-                         z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                         data=self.data+other.data, data_name=self.data_name+' + '+other.data_name, \
-                         data_units=self.data_units)
-        return out
-
-    def __sub__(self, other):
-        """Return the difference between two LESProfile objects
-
-        :other: (LESProfile object): LESProfile objects to be subtracted
+        :other: (float, int or LESProfile object): object to be added
 
         """
-        assert type(other) == type(LESProfile()), 'Only LESProfile object can be subtracted from a LESProfile object'
-        assert self.data_units == other.data_units, 'LESProfile has a different unit'
-        assert self.time_units == other.time_units, 'LESProfile has a different time unit'
-        assert self.z_units == other.z_units, 'LESProfile has a different z unit'
-        assert all(self.time == other.time), 'LESProfile has a different time coordinate'
-        assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
-        out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
-                         z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                         data=self.data-other.data, data_name=self.data_name+' - '+other.data_name, \
-                         data_units=self.data_units)
-        return out
-
-    def __mul__(self, other):
-        """Return the product of two LESProfile objects
-
-        :other: (LESProfile object): LESProfile objects to be multiply self
-
-        """
-        if type(other) == float:
+        if isinstance(other, float) or isinstance(other, int):
             out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
                              z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                             data=self.data*other, data_name=self.data_name, data_units=self.data_units)
-        elif type(other) == type(LESProfile()):
-            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
-            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
-            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
-            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
-            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
-                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                             data=self.data*other.data, data_name=self.data_name+' * '+other.data_name, \
-                             data_units=self.data_units+' * '+other.data_units)
-        else:
-            raise TypeError('Multiplication by a(n) {} object is not supported.'.format(type(other)))
-        return out
-
-    def __truediv__(self, other):
-        """Return the ratio of two LESProfile objects
-
-        :other: (LESProfile object): LESProfile objects to divide self
-
-        """
-        if type(other) == float:
-            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
-                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                             data=self.data/other, data_name=self.data_name+' ratio', data_units='none')
-        elif type(other) == type(LESProfile()):
+                             data=self.data+other, data_name=self.data_name, data_units=self.data_units)
+        elif isinstance(other, LESProfile):
             assert self.data_units == other.data_units, 'LESProfile has a different unit'
             assert self.time_units == other.time_units, 'LESProfile has a different time unit'
             assert self.z_units == other.z_units, 'LESProfile has a different z unit'
@@ -112,10 +62,85 @@ class LESProfile(object):
             assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
             out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
                              z=self.z, z_name=self.z_name, z_units=self.z_units, \
-                             data=self.data/other.data, data_name=self.data_name+' / '+other.data_name, \
-                             data_units=self.data_units+' / '+other.data_units)
+                             data=self.data+other.data, data_name='Sum of '+self.data_name, \
+                             data_units=self.data_units)
         else:
-            raise TypeError('Division by a(n) {} object is not supported.'.format(type(other)))
+            raise TypeError('Addition is not defined between a LESProfile object and a {} object'.format(type(other)))
+        return out
+
+    def __sub__(self, other):
+        """Subtract 'other' from a LESProfile object
+
+        :other: (float, int, or LESProfile object): object to be subtracted
+
+        """
+        if isinstance(other, float) or isinstance(other, int):
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data-other, data_name=self.data_name, data_units=self.data_units)
+        elif isinstance(other, LESProfile):
+            assert self.data_units == other.data_units, 'LESProfile has a different unit'
+            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data-other.data, data_name='Diff. of '+self.data_name, \
+                             data_units=self.data_units)
+        else:
+            raise TypeError('Subtraction is not defined between a LESProfile object and a {} object'.format(type(other)))
+        return out
+
+    def __mul__(self, other):
+        """Multiply a LESProfile object by 'other'
+
+        :other: (float, int, or LESProfile object): object to be multiplied
+
+        """
+        if isinstance(other, float) or isinstance(other, int):
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data*other, data_name=self.data_name, data_units=self.data_units)
+        elif isinstance(other, LESProfile):
+            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data*other.data, data_name=self.data_name+' '+other.data_name, \
+                             data_units=self.data_units+' '+other.data_units)
+        else:
+            raise TypeError('Multiplication is not defined between a LESProfile object and a {} object'.format(type(other)))
+        return out
+
+    def __truediv__(self, other):
+        """Divide a LESProfile object by 'other'
+
+        :other: (float, int, or LESProfile object): object to be divided
+
+        """
+        if isinstance(other, float) or isinstance(other, int):
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data/other, data_name=self.data_name, data_units=self.units)
+        elif isinstance(other, LESProfile):
+            assert self.time_units == other.time_units, 'LESProfile has a different time unit'
+            assert self.z_units == other.z_units, 'LESProfile has a different z unit'
+            assert all(self.time == other.time), 'LESProfile has a different time coordinate'
+            assert all(self.z == other.z), 'LESProfile has a different vertical coordinate'
+            if other.data_name == self.data_name and other.data_units == self.data_units:
+                name = 'Ratio of '+self.data_name
+                units = 'None'
+            else:
+                name = self.data_name+'/'+other.data_name
+                units = self.data_units+'/('+other.data_units+')'
+            out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
+                             z=self.z, z_name=self.z_name, z_units=self.z_units, \
+                             data=self.data/other.data, data_name=name, data_units=units)
+        else:
+            raise TypeError('Division is not defined between a LESProfile object and a {} object'.format(type(other)))
         return out
 
     def save(self, path):
@@ -159,7 +184,8 @@ class LESProfile(object):
         z = 0.5*(self.z[1:]+self.z[0:-1])
         out = LESProfile(time=self.time, time_name=self.time_name, time_units=self.time_units, \
                          z=z, z_name=self.z_name, z_units=self.z_units, \
-                         data=data, data_name='ddz '+self.data_name, data_units=self.data_units+'/m')
+                         data=data, data_name='ddz '+self.data_name, \
+                         data_units=self.data_units+'/'+self.z_units)
         return out
 
     def plot(self, axis=None, xlim=None, ylim=None,
