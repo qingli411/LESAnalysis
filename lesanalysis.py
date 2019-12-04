@@ -254,7 +254,7 @@ class LESProfile(object):
         if axis is None:
             axis = plt.gca()
         # plot figure
-        fig = axis.plot(self.data_mean*norm, self.z*znorm, **kwargs)
+        fig = axis.plot(self.data_mean()*norm, self.z*znorm, **kwargs)
         # x- and y-label, turn off by passing in 'off'
         if xlabel is None:
             axis.set_xlabel(self.data_name+' ('+self.data_units+')')
