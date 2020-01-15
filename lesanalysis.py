@@ -650,7 +650,7 @@ class NCARLESData1DPR(LESnetCDF):
                       'dsle23', 'dsle33', 'utle', 'vtle', 'ut', 'vt',
                       'stokes']
         list_zwvar = ['wtle', 'wtsb', 'englez', 'engz', 't_dsle',
-                      't_rprod', 't_sprod', 't_stokes', 't_tran',
+                      't_rprod', 't_sprod', 't_stokes', 't_tran', 't_tau',
                       't_wq', 't_wp', 'uwle', 'uwsb', 'vwle', 'vwsb',
                       'wps', 'wxym', 'wcube', 'wfour', 'shrz',
                       'dudz', 'dvdz', 't_diss', 'uuwle', 'uvwle',
@@ -676,7 +676,7 @@ class NCARLESData1DPR(LESnetCDF):
         elif varname in list_zuvar:
             zname = 'z_u'
 
-        varunits = None
+        varunits = 'None'
         zcoord = self.dataset.variables[zname][:]
         zunits = 'm'
         out = LESProfile(time=time, z=zcoord, z_name=zname, z_units=zunits,
