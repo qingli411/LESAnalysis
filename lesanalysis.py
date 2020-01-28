@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
+from datetime import datetime, timedelta
 
 #--------------------------------
 # LESProfile
@@ -66,6 +67,8 @@ class LESProfile(object):
             fig = axis.pcolor(self.time, self.z, np.transpose(self.data), **kwargs)
         else:
             raise ValueError('Plot type (ptype) should be \'contourf\' or \'pcolor\', got {}.'.format(ptype))
+        if title is not None:
+            axis.set_title(title)
         # x- and y-label, turn off by passing in 'off'
         if xlabel is None:
             axis.set_xlabel(self.time_name+' ('+self.time_units+')')
@@ -310,13 +313,16 @@ class PALMData1DPR(LESnetCDF):
 
         """
         list_fluxes = ['wu', 'wv', 'wpt', 'wvpt', 'wq', 'wqv', 'ws', 'wsa']
-        time = self.dataset.variables['time'][tidx_start:tidx_end]
+        seconds = self.dataset.variables['time'][tidx_start:tidx_end]
+        time = [datetime(1,1,1)+timedelta(seconds=seconds[idx]) for idx in np.arange(seconds.size)]
         if varname in self.list_variables:
             var = self.dataset.variables[varname][tidx_start:tidx_end, :]
             varunits = self.dataset.variables[varname].units
             zname = 'z'+varname
             zcoord = self.dataset.variables[zname][:]
             zunits = self.dataset.variables[zname].units
+            if varname == 'pt':
+                var = var - 273.15
         elif varname in list_fluxes:
             varname_sgs = varname[0]+'"'+varname[1:]+'"'
             varname_res = varname[0]+'*'+varname[1:]+'*'
